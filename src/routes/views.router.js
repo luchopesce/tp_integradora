@@ -1,17 +1,12 @@
 import { Router } from "express";
-import {
-  ProductManager,
-  config,
-  MessageManager
-} from "../dao/index.js";
-import {Server } from "socket.io"
+import { ProductManager, config} from "../dao/index.js";
 
 const router = Router();
 const productManager = new ProductManager();
 
 router.get("/", async (req, res) => {
   const { app } = req;
-  const io = new Server (app.get("server"));
+  const io = app.get("io");
   const products = await productManager.getProducts();
 
   io.on("connection", () => {
@@ -23,7 +18,7 @@ router.get("/", async (req, res) => {
 
 router.get("/products", async (req, res) => {
   const { app } = req;
-  const io = new Server (app.get("server"));
+  const io = app.get("io");
   const products = await productManager.getProducts();
 
   io.on("connection", () => {
@@ -34,24 +29,7 @@ router.get("/products", async (req, res) => {
 });
 
 if (config.presistenceType === "db") {
-  router.get("/messages", async (req, res) => {
-    const { app } = req;
-    const io = new Server (app.get("server"));
-    const messageManager = new MessageManager()
-    const messages = await messageManager.getMessages()
-    
-io.on("connection", (socket) => {
-  console.log(`New client connected with id:${socket.id}`);
-    socket.on("new-user", (username) => {
-      socket.emit("messages", messages);
-      socket.broadcast.emit("new-user", username);
-    });
-
-    socket.on("chat-message", async (data) => {
-      await messageManager.createMessage(data, io)
-    }); 
-});
-
+  router.get("/messages", (req, res) => {
     res.render("messages");
   });
 }

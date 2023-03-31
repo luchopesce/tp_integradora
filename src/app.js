@@ -5,17 +5,23 @@ import cartRouter from "./routes/cart.router.js";
 import { engine } from "express-handlebars";
 import __dirname from "./utils.js";
 import mongoose from "mongoose";
+import { config } from "./dao/index.js";
+import { Server } from "socket.io";
+import { MessageManager } from "./dao/index.js";
 
 const app = express();
-export const httpServer = app.listen(8080, () => {
+const httpServer = app.listen(8080, () => {
   console.log("Server listening on port 8080");
 });
+const io = new Server(httpServer)
+const messageManager = new MessageManager()
 
 app.engine("handlebars", engine());
 
 app.set("server", httpServer);
 app.set("view engine", "handlebars");
 app.set("views", __dirname + "/views");
+app.set("io", io);
 
 app.use(express.json());
 app.use(express.static(__dirname + "/../src/public"));
@@ -33,5 +39,23 @@ mongoose
   )
   .then((conn) => {
     console.log("Connected to DB");
+  });
+
+  io.on("connection", (socket) => {
+    console.log(`New client connected with id:${socket.id}`);
+
+    socket.on("new-user", async (userName) => {
+      const messages = await messageManager.getMessages();
+      socket.emit("messages", messages);
+      socket.broadcast.emit("new-user", userName);
+    });
+
+    socket.on("chat-message", async (data) => {
+      const result = await messageManager.createMessage(data);
+      result.save().then(async () => {
+        const messages = await messageManager.getMessages();
+        io.emit("messages", messages);
+      });
+    });
   });
 

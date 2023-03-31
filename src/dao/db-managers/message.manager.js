@@ -9,25 +9,11 @@ export default class MessageManager {
     return messages;
   };
 
-  createMessage = async (data, io) => {
+  createMessage = async (data) => {
     const newMessage = new messageModel({
       usuario: data.userName,
       message: data.message,
     });
-    newMessage
-      .save()
-      .then(() => {
-        console.log("Mensaje guardado en MongoDB" )
-        this.sendMessage(io)
-      })
-      .catch((error) =>
-        console.error("Error al guardar el mensaje en MongoDB", error)
-      );
+    return newMessage
   };
-
-  sendMessage = async (app) => {
-    const io = app
-    const messages = await this.getMessages();
-    io.emit("messages", messages);
-  }
 }

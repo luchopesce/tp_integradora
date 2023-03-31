@@ -1,8 +1,8 @@
 const socket = io();
+let userName;
 
 const listMessages = document.getElementById("list-messages");
 if (listMessages) {
-  let userName;
   Swal.fire({
     title: "Login",
     input: "text",
@@ -15,6 +15,7 @@ if (listMessages) {
     userName = res.value;
     socket.emit("new-user", userName);
   });
+}
 
   const chatInput = document.getElementById("chat-input");
   chatInput.addEventListener("keyup", (ev) => {
@@ -46,7 +47,6 @@ if (listMessages) {
       position: "top-end",
     });
   });
-}
 
 const listProducts = document.getElementById("list-products");
 if (listProducts) {
