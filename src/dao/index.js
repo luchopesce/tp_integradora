@@ -9,7 +9,7 @@ const pathProducts = `${__dirname}/dao/file-managers/files/products.json`;
 const pathCart = `${__dirname}/dao/file-managers/files/cart.json`;
 
 const config = {
-  presistenceType: "db",
+  presistenceType: "file",
 };
 
 let ProductManager, CartManager, MessageManager;

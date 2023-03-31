@@ -13,8 +13,7 @@ const app = express();
 const httpServer = app.listen(8080, () => {
   console.log("Server listening on port 8080");
 });
-const io = new Server(httpServer)
-const messageManager = new MessageManager()
+const io = new Server(httpServer);
 
 app.engine("handlebars", engine());
 
@@ -28,8 +27,6 @@ app.use(express.static(__dirname + "/../src/public"));
 
 //routes
 app.use("/", viewsRouter);
-app.use("/products", viewsRouter);
-app.use("/messages", viewsRouter)
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartRouter);
 
@@ -41,6 +38,8 @@ mongoose
     console.log("Connected to DB");
   });
 
+if (config.presistenceType === "db") {
+  const messageManager = new MessageManager();
   io.on("connection", (socket) => {
     console.log(`New client connected with id:${socket.id}`);
 
@@ -58,4 +57,4 @@ mongoose
       });
     });
   });
-
+}
