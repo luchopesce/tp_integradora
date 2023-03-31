@@ -2,7 +2,7 @@ import productModel from "../models/product.model.js"
 
 export default class ProductManager {
   constructor(){
-      console.log("Working with users using dbsystem")
+      console.log("Working with products using dbsystem")
   }
 
   getProducts = async () => {
