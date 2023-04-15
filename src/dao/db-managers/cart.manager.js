@@ -1,6 +1,8 @@
 import { ProductManager } from "../index.js";
 import cartModel from "../models/cart.model.js";
 
+let arrOptions = []
+
 export default class CartManager {
   #productManager = new ProductManager();
   constructor() {
@@ -117,14 +119,9 @@ export default class CartManager {
     }
   };
 
-  getProduct = async (id) => {
-    const product = await cartModel.findById(id);
-    return product;
-  };
-
-  sendMessage = async (app) => {
+  sendMessage = async (app, cid) => {
     const io = app.get("io");
-    const carts = await this.getCarts();
-    io.emit("list-cart", carts);
+    const carts = await this.getCartById(cid);
+    io.emit("list-carts", carts);
   };
 }

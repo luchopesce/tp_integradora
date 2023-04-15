@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { ProductManager, config } from "../dao/index.js";
+import { ProductManager, config, CartManager } from "../dao/index.js";
 
 const router = Router();
 const productManager = new ProductManager();
+const cartManager = new CartManager()
 
 router.get("/", async (req, res) => {
   const { app } = req;
@@ -19,10 +20,6 @@ router.get("/", async (req, res) => {
 router.get("/products", async (req, res) => {
   const { app } = req;
   const io = app.get("io");
-
-  // const { page } = req.query;
-  // const products = await productManager.getProducts();
-  // console.log(paginate)
 
   io.on("connection", async (socket) => {
     let options = {
@@ -42,6 +39,38 @@ router.get("/products", async (req, res) => {
   });
 
   res.render("products");
+});
+
+router.get("/carts/:cid", async (req, res) => {
+  const { app } = req;
+  const io = app.get("io");
+  const { cid } = req.params
+  const carts = await cartManager.getCartById(cid);
+  console.log(carts)
+
+  // io.on("connection", async (socket) => {
+  //   let options = {
+  //     lean: true,
+  //     limit: 10,
+  //     sort: {price: "asc"}
+  //   }
+  //   socket.on("cart", async (data) => {
+  //     if(data){
+  //       options.page = data
+  //     }
+  //     const paginate = await cartManager.paginateCarts({}, options);
+  //     io.emit("list-carts", paginate);
+  //   });
+  //   const paginate = await CartManager.paginateCarts({}, options);
+  //   io.emit("list-carts", paginate);
+  // });
+
+  io.on("connection", () => {
+    io.emit("list-carts", carts);
+  });
+
+
+  res.render("carts");
 });
 
 if (config.presistenceType === "db") {

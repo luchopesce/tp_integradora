@@ -57,7 +57,7 @@ router.post("/:cid/products/:pid", async (req, res) => {
     }
     else{
       res.status(201).send({ status: "ok", payload: result });
-      cartManager.sendMessage(app);
+      cartManager.sendMessage(app, cartId);
     }
   } catch (err) {
     res.status(400).send({ status: "error", payload: err.message });

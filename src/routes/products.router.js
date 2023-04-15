@@ -8,14 +8,6 @@ const productManager = new ProductManager();
 router.get("/", async (req, res) => {
   const { limit, page, sort, title, stock } = req.query;
 
-  // const products = await productManager.getProducts();
-  // if (limit > 0) {
-  //   const productLimit = products.splice(0, limit);
-  //   res.json(productLimit);
-  // } else {
-  //   res.json(products);
-  // }
-
   let options = {
     lean: true,
     limit: limit ?? 10,
