@@ -23,34 +23,103 @@ export default class CartManager {
   };
 
   createCart = async () => {
-    const newCart = await cartModel.create({ products: [] });
+    const newCart = await cartModel.create({});
     return newCart;
   };
 
-  addProductToCart = async (cartId, prodId) => {
+  updateProductQuantity = async (cartId, prodId, reqQuantity) => {
     const cart = await this.getCartById(cartId);
     const product = await this.#productManager.getProductById(prodId);
-    if (cart && product) {
-      let addProduct;
-      if (cart.products.some((thisCart) => thisCart.__prodId === prodId)) {
-        addProduct = cart.products.map((thisCartMap) => {
-          if (thisCartMap.__prodId === prodId) {
-            return {
-              ...thisCartMap,
-              quantity: thisCartMap.quantity + 1,
-            };
+    if (cart && product && reqQuantity.hasOwnProperty("quantity")) {
+      let updateQuantity;
+      const existProductInCart = cart.products.some(
+        (thisCart) => thisCart.product._id == prodId
+      );
+      if (existProductInCart) {
+        updateQuantity = cart.products.map((thisCartMap) => {
+          if (thisCartMap.product != undefined) {
+            if (thisCartMap.product._id == prodId) {
+              return {
+                ...thisCartMap,
+                ...reqQuantity,
+              };
+            }
           }
           return thisCartMap;
         });
       } else {
-        addProduct = [...cart.products, { __prodId: prodId, quantity: 1 }];
+        return;
       }
 
+      cart.products = updateQuantity;
+      return cart.save();
+    } else {
+      return;
+    }
+  };
+
+  deleteProductInCart = async (cartId, prodId) => {
+    const cart = await this.getCartById(cartId);
+    const product = await this.#productManager.getProductById(prodId);
+    if (cart && product) {
+      let updateCart;
+      const existProductInCart = cart.products.some(
+        (thisCart) => thisCart.product._id == prodId
+      );
+      if (existProductInCart) {
+        updateCart = cart.products.filter((thisCartFilter) => {
+          if (thisCartFilter.product != undefined) {
+            return thisCartFilter.product._id != prodId;
+          }
+        });
+      } else {
+        return;
+      }
+      cart.products = updateCart;
+      return cart.save();
+    } else {
+      return;
+    }
+  };
+
+  addProductToCart = async (cartId, prodId, obj) => {
+    const cart = await this.getCartById(cartId);
+    const product = await this.#productManager.getProductById(prodId);
+    if (cart && product) {
+      let addProduct;
+      const existProductInCart = cart.products.some(
+        (thisCart) => thisCart.product._id == prodId
+      );
+      if (existProductInCart) {
+        addProduct = cart.products.map((thisCartMap) => {
+          if (thisCartMap.product != undefined) {
+            if (thisCartMap.product._id == prodId) {
+              return {
+                ...thisCartMap,
+                quantity: thisCartMap.quantity + 1,
+              };
+            }
+          }
+
+          return thisCartMap;
+        });
+      } else {
+        addProduct = [...cart.products, { product: prodId, quantity: 1 }];
+      }
+      cart.products = addProduct;
+      return cart.save();
+    } else if (cart && obj) {
+      let addProduct = [...cart.products, { insertProduct: obj, quantity: 1 }];
       cart.products = addProduct;
       return cart.save();
     } else {
       return;
     }
+  };
+
+  getProduct = async (id) => {
+    const product = await cartModel.findById(id);
+    return product;
   };
 
   sendMessage = async (app) => {

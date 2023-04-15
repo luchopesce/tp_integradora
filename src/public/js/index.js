@@ -49,10 +49,11 @@ if (listMessages) {
 }
 
 const listProducts = document.getElementById("list-products");
+const pageList = document.getElementById("list-page");
 if (listProducts) {
   socket.on("list-products", (data) => {
     listProducts.innerHTML = "";
-    for (const el of data) {
+    for (const el of data.docs) {
       const li = document.createElement("li");
       if (el.id >= 0) {
         li.innerText = `${el.title}: ${el.price}, ID: ${el.id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
@@ -61,6 +62,41 @@ if (listProducts) {
         li.innerText = `${el.title}: ${el.price}, _id: ${el._id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
         listProducts.appendChild(li);
       }
+    }
+    if (pageList) {
+      pageList.innerHTML = "";
+      if (data.hasPrevPage) {
+        // const aPrev = document.createElement("a");
+        // aPrev.href = `/products?page=${data.prevPage}`;
+        // aPrev.innerHTML = `Anterior`;
+        // pageList.appendChild(aPrev);
+
+        //button
+        const buttonPrev = document.createElement("button");
+        buttonPrev.innerText = "Anterior";
+        buttonPrev.addEventListener("click", (evt) => {
+          evt.preventDefault();
+          socket.emit("page", data.prevPage);
+        });
+        pageList.appendChild(buttonPrev);
+      }
+      if (data.hasNextPage) {
+        // const ahasPrev = document.createElement("a");
+        // ahasPrev.href = `/products?page=${data.nextPage}`;
+        // ahasPrev.innerHTML = `Siguiente`;
+        // pageList.appendChild(ahasPrev);
+
+        const buttonNext = document.createElement("button");
+        buttonNext.innerText = "Siguiente";
+        buttonNext.addEventListener("click", (evt) => {
+          evt.preventDefault();
+          socket.emit("page", data.nextPage);
+        });
+        pageList.appendChild(buttonNext);
+      }
+      const spanPage = document.createElement("span");
+      spanPage.innerHTML = `Pagina ${data.page} de ${data.totalPages}`;
+      pageList.appendChild(spanPage);
     }
   });
 }

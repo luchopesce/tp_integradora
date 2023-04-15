@@ -28,7 +28,7 @@ app.use(express.static(__dirname + "/../src/public"));
 //routes
 app.use("/", viewsRouter);
 app.use("/api/products", productsRouter);
-app.use("/api/cart", cartRouter);
+app.use("/api/carts", cartRouter);
 
 mongoose
   .connect(

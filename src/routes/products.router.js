@@ -6,27 +6,50 @@ router.use(json());
 const productManager = new ProductManager();
 
 router.get("/", async (req, res) => {
-  const { limit } = req.query;
-  const products = await productManager.getProducts();
-  if (limit > 0) {
-    const productLimit = products.splice(0, limit);
-    res.json(productLimit);
-  } else {
-    res.json(products);
+  const { limit, page, sort, title, stock } = req.query;
+
+  // const products = await productManager.getProducts();
+  // if (limit > 0) {
+  //   const productLimit = products.splice(0, limit);
+  //   res.json(productLimit);
+  // } else {
+  //   res.json(products);
+  // }
+
+  let options = {
+    lean: true,
+    limit: limit ?? 10,
+    page: page ?? 1,
+    sort: { price: sort },
+  };
+  let query = {};
+  if (title) {
+    query.title = { $regex: new RegExp(title) };
+  }
+  if (stock) {
+    query.stock = Number(stock);
+  }
+
+  try {
+    const paginate = await productManager.paginateProducts(query, options);
+    res.status(200).send({ status: "ok", payload: paginate  });
+  } catch (err) {
+    res.status(400).send({ status: "error", payload: err.message });
   }
 });
 
 router.get("/:pid/", async (req, res) => {
   const pid = req.params.pid;
-  try{
+  try {
     const result = await productManager.getProductById(pid);
-    if(!result){
-      res.status(400).send({ status: "error", id: pid, payload: "Product no exists"});
-    }
-    else{
+    if (!result) {
+      res
+        .status(400)
+        .send({ status: "error", id: pid, payload: "Product no exists" });
+    } else {
       res.json(result);
     }
-  }catch(err){
+  } catch (err) {
     res.status(400).send({ status: "error", payload: err.message });
   }
 });
@@ -50,15 +73,12 @@ router.post("/", async (req, res) => {
   }
 
   if (products.some((product) => product.code === code)) {
-    res
-      .status(400)
-      .send({
-        status: "error",
-        code: code,
-        payload: "Code existing, change this code",
-      });
-  }
-  else{
+    res.status(400).send({
+      status: "error",
+      code: code,
+      payload: "Code existing, change this code",
+    });
+  } else {
     const result = await productManager.createProduct({
       title,
       description,
@@ -68,21 +88,21 @@ router.post("/", async (req, res) => {
       category,
       thumbnail: [],
     });
-  
+
     if (!result) {
       return res
         .status(404)
         .send({ status: "error", payload: "Check paramaters" });
     }
-  
+
     res.status(201).send({ status: "ok", payload: result });
-    productManager.sendMessage(app); 
+    productManager.sendMessage(app);
   }
 });
 
 router.put("/:pid", async (req, res) => {
   const { app } = req;
-  const {pid} = req.params;
+  const { pid } = req.params;
   const obj = req.body;
 
   if (Object.entries(obj).length < 1) {
@@ -91,36 +111,36 @@ router.put("/:pid", async (req, res) => {
       .send({ status: "error", payload: "Missing parameters" });
   }
 
-  try{
+  try {
     const result = await productManager.updateProduct(pid, obj);
-    if(!result){
-      res.status(400).send({ status: "error", id: pid, payload: "Product no exists"});
-    }
-    else{
+    if (!result) {
+      res
+        .status(400)
+        .send({ status: "error", id: pid, payload: "Product no exists" });
+    } else {
       res.status(200).send({ status: "ok", payload: result });
       productManager.sendMessage(app);
     }
-  }catch(err){
+  } catch (err) {
     res.status(400).send({ status: "error", payload: err.message });
   }
-
-
 });
 
 router.delete("/:pid", async (req, res) => {
   const { app } = req;
   const pid = req.params.pid;
 
-  try{
+  try {
     const result = await productManager.deleteProduct(pid);
-    if(!result){
-      res.status(400).send({ status: "error", id: pid, payload: "Product no exists"});
-    }
-    else{
+    if (!result) {
+      res
+        .status(400)
+        .send({ status: "error", id: pid, payload: "Product no exists" });
+    } else {
       res.status(200).send({ status: "ok", payload: result });
       productManager.sendMessage(app);
     }
-  }catch(err){
+  } catch (err) {
     res.status(400).send({ status: "error", payload: err.message });
   }
 });
