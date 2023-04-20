@@ -5,22 +5,29 @@ const router = Router();
 router.use(json());
 
 router.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
-  let rol;
-  if (!email || !password) {
-    return res.status(401).send("SignUp fail!");
-  }
   try {
+    const { email, password } = req.body;
+    let rol;
+    if (!email || !password) {
+      return res.status(401).send("SignUp fail!");
+    }
     if(email === "adminCoder@coder.com"){
       rol = "admin"
     }
     else{
       rol = "usuario"
     }
-    const newUser = await userModel.create({ email, password, rol});
-    req.session.user = newUser.email;
-    req.session.rol = newUser.rol
-    res.send("Register sucessfull!")
+    const user = await userModel.findOne({email:email})
+
+    if(!user){
+      const newUser = await userModel.create({ email, password, rol});
+      req.session.user = newUser.email;
+      req.session.rol = newUser.rol
+      res.redirect("/perfil")
+    }
+    else{
+      res.send(`Usuario ya registrado <a href="/login">Iniciar sesion</a>`)
+    }
   } catch (error) {
     res.status(401).send({ error: error });
   }
