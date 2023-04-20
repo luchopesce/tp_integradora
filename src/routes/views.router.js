@@ -5,6 +5,7 @@ const router = Router();
 const productManager = new ProductManager();
 const cartManager = new CartManager()
 
+
 router.get("/", async (req, res) => {
   const { app } = req;
   const io = app.get("io");
@@ -20,6 +21,7 @@ router.get("/", async (req, res) => {
 router.get("/products", async (req, res) => {
   const { app } = req;
   const io = app.get("io");
+  const session = req.session
 
   io.on("connection", async (socket) => {
     let options = {
@@ -38,7 +40,7 @@ router.get("/products", async (req, res) => {
     io.emit("list-products", paginate);
   });
 
-  res.render("products");
+  res.render("products", {session});
 });
 
 router.get("/carts/:cid", async (req, res) => {
@@ -51,7 +53,6 @@ router.get("/carts/:cid", async (req, res) => {
     io.emit("list-carts", carts);
   });
 
-
   res.render("carts");
 });
 
@@ -60,5 +61,38 @@ if (config.presistenceType === "db") {
     res.render("messages");
   });
 }
+
+router.get("/cookies", async (req, res) => {
+  res.render("cookies");
+});
+
+router.get("/login", async (req, res) => {
+  const session = req.session
+  if(session.user){
+    res.redirect("/perfil")
+  }else{
+    res.render("login")
+  }
+
+});
+
+router.get("/perfil", async (req, res) => {
+  const session = req.session
+  if(session.user){
+    res.render("perfil", {session});
+  }else{
+    res.redirect("/login")
+  }
+
+});
+
+router.get("/registro", async (req, res) => {
+  const session = req.session
+  if(session.user){
+    res.redirect("/perfil")
+  }else{
+    res.render("registro");
+  }
+});
 
 export default router;

@@ -1,7 +1,22 @@
-const socket = io();
 let userName;
 
+const btnCookies = document.getElementById("get-cookie-btn");
+if (btnCookies) {
+  btnCookies.addEventListener("click", () => {
+    fetch("/api/cookies/get")
+      .then((res) => res.json())
+      .then((data) => console.log(data));
+  });
+}
 const listMessages = document.getElementById("list-messages");
+const listCart = document.getElementById("list-carts");
+const listProducts = document.getElementById("list-products");
+const pageList = document.getElementById("list-page");
+
+if (listCart || listMessages || listProducts) {
+  var socket = io();
+}
+
 if (listMessages) {
   Swal.fire({
     title: "Login",
@@ -48,10 +63,9 @@ if (listMessages) {
   });
 }
 
-const listCart = document.getElementById("list-carts")
-if(listCart){
-  socket.on("list-carts", (data) =>{
-    console.log(data.products)
+if (listCart) {
+  socket.on("list-carts", (data) => {
+    console.log(data.products);
     listCart.innerHTML = "";
     for (const el of data.products) {
       const li = document.createElement("li");
@@ -61,28 +75,24 @@ if(listCart){
       `;
       listCart.appendChild(li);
     }
-
-  })
+  });
 }
 
-const listProducts = document.getElementById("list-products");
-const pageList = document.getElementById("list-page");
 if (listProducts) {
   socket.on("list-products", (data) => {
     listProducts.innerHTML = "";
     for (const el of data.docs) {
       const li = document.createElement("li");
-      const cartButton = document.createElement("button")
-      cartButton.innerText = "Agregar al carrito"
+      const cartButton = document.createElement("button");
+      cartButton.innerText = "Agregar al carrito";
       // if (el.id >= 0) {
       //   li.innerText = `${el.title}: ${el.price}, ID: ${el.id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
       //   listProducts.appendChild(li);
       // } else if (el._id) {     }
 
-        li.innerText = `${el.title}: ${el.price}, _id: ${el._id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
-        li.appendChild(cartButton)
-        listProducts.appendChild(li);
-
+      li.innerText = `${el.title}: ${el.price}, _id: ${el._id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
+      li.appendChild(cartButton);
+      listProducts.appendChild(li);
     }
     if (pageList) {
       pageList.innerHTML = "";
