@@ -3,8 +3,7 @@ import { ProductManager, config, CartManager } from "../dao/index.js";
 
 const router = Router();
 const productManager = new ProductManager();
-const cartManager = new CartManager()
-
+const cartManager = new CartManager();
 
 router.get("/", async (req, res) => {
   const { app } = req;
@@ -21,17 +20,17 @@ router.get("/", async (req, res) => {
 router.get("/products", async (req, res) => {
   const { app } = req;
   const io = app.get("io");
-  const session = req.session
+  const user = req.user;
 
   io.on("connection", async (socket) => {
     let options = {
       lean: true,
       limit: 2,
-      sort: {price: "asc"}
-    }
+      sort: { price: "asc" },
+    };
     socket.on("page", async (data) => {
-      if(data){
-        options.page = data
+      if (data) {
+        options.page = data;
       }
       const paginate = await productManager.paginateProducts({}, options);
       io.emit("list-products", paginate);
@@ -40,15 +39,15 @@ router.get("/products", async (req, res) => {
     io.emit("list-products", paginate);
   });
 
-  res.render("products", {session});
+  res.render("products", user);
 });
 
 router.get("/carts/:cid", async (req, res) => {
   const { app } = req;
   const io = app.get("io");
-  const { cid } = req.params
+  const { cid } = req.params;
   const carts = await cartManager.getCartById(cid);
-  
+
   io.on("connection", () => {
     io.emit("list-carts", carts);
   });
@@ -67,30 +66,38 @@ router.get("/cookies", async (req, res) => {
 });
 
 router.get("/login", async (req, res) => {
-  const session = req.session
-  if(session.user){
-    res.redirect("/perfil")
-  }else{
-    res.render("login")
+  const user = req.user
+  if(user){
+    res.redirect("/perfil");
+  } else {
+    res.render("login");
   }
+});
 
+router.get("/forgot", async (req, res) => {
+  const user = req.user
+  if(user){
+    res.redirect("/perfil");
+  } else {
+    res.render("forgot");
+  }
 });
 
 router.get("/perfil", async (req, res) => {
-  const session = req.session
-  if(session.user){
-    res.render("perfil", {session});
-  }else{
-    res.redirect("/login")
-  }
+  const user = req.user
+    if(user){
+      res.render("perfil", user);
+    }else{
+      res.redirect("/login")
+    }
 
 });
 
 router.get("/registro", async (req, res) => {
-  const session = req.session
-  if(session.user){
-    res.redirect("/perfil")
-  }else{
+  const user = req.user
+  if(user){
+    res.redirect("/perfil");
+  } else {
     res.render("registro");
   }
 });

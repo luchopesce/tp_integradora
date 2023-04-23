@@ -2,8 +2,14 @@
     Pagina Perfil
 </h1>
 <div>
-<h1>Session iniciada con usuario {{session.user}}</h1>
-<h2>Rol: {{session.rol}}</h2>
+<h1>Session iniciada con usuario: {{email}}</h1>
+{{#if name}}
+<h2>Nombre: {{name}}</h2>
+{{/if}}
+{{#if surname}}
+<h2>Apellido: {{surname}}</h2>
+{{/if}}
+<h2>Rol: {{rol}}</h2>
 <div>
     <a href="sessions/logout">Logout</a>
 </div>

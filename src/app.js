@@ -3,7 +3,8 @@ import viewsRouter from "./routes/views.router.js";
 import productsRouter from "./routes/products.router.js";
 import cartRouter from "./routes/cart.router.js";
 import cookiesRouter from "./routes/cookies.router.js"
-import sessionsRouter from "./routes/sessions.router.js"
+// import sessionsRouter from "./routes/sessions.router.js"
+import authRouter from "./routes/auth.router.js"
 import { engine } from "express-handlebars";
 import __dirname from "./utils.js";
 import mongoose from "mongoose";
@@ -12,6 +13,8 @@ import { Server } from "socket.io";
 import { MessageManager } from "./dao/index.js";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import passport from "passport";
+import { initialzedPassport } from "./config/passport.config.js";
 
 const app = express();
 const httpServer = app.listen(8080, () => {
@@ -41,13 +44,18 @@ app.use(
   })
 );
 
+//inicializando passport
+initialzedPassport()
+app.use(passport.initialize())
+app.use(passport.session())
 
 //routes
 app.use(viewsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartRouter);
 app.use("/api/cookies", cookiesRouter)
-app.use("/sessions", sessionsRouter)
+// app.use("/sessions", sessionsRouter)
+app.use("/sessions", authRouter)
 
 mongoose
   .connect(DB)
