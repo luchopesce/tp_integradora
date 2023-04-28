@@ -37,14 +37,19 @@ export function generateToken(user) {
 }
 
 export function validateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader)
-    return res.status(401).send({ message: "Error de authorization" });
-  const token = authHeader.split(" ")[1];
-  // console.log(token)
+  const token = req.cookies["token-cookie"]
+  console.log(token)
   jwt.verify(token, SECRET_KEY, (err, info) => {
     if (err) return res.status(401).send({ message: "Error de datos" });
     req.user = info;
     next();
   });
+}
+
+export const cookieExtractor = (req, res, next)=>{
+  let token = null
+  if(req && req.cookies){
+    token = req.cookies["token-cookie"]
+  }
+  return token
 }

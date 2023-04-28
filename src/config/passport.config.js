@@ -1,8 +1,12 @@
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import userModel from "../dao/models/user.model.js";
-import { createHashB, isValidPassword } from "../utils.js";
+import { createHashB, isValidPassword, cookieExtractor } from "../utils.js";
 import GitHubStrategy from "passport-github2";
+import jwt from "passport-jwt";
+
+const jwtStrategy = jwt.Strategy;
+const ExtractJwt = jwt.ExtractJwt;
 
 const initialzedPassport = () => {
   passport.use(
@@ -94,6 +98,23 @@ const initialzedPassport = () => {
     )
   );
 
+  passport.use(
+    "jwt",
+    new jwtStrategy(
+      {
+        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
+        secretOrKey: "tokenSecretKey",
+      },
+      async (jwt_payload, done) => {
+        try {
+          return done(null, jwt_payload);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
+
   passport.serializeUser((user, done) => {
     return done(null, user._id);
   });
@@ -103,5 +124,7 @@ const initialzedPassport = () => {
     return done(null, user);
   });
 };
+
+
 
 export { initialzedPassport };

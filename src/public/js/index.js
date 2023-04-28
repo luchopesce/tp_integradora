@@ -1,3 +1,4 @@
+
 let userName;
 
 const btnCookies = document.getElementById("get-cookie-btn");
@@ -12,9 +13,45 @@ const listMessages = document.getElementById("list-messages");
 const listCart = document.getElementById("list-carts");
 const listProducts = document.getElementById("list-products");
 const pageList = document.getElementById("list-page");
+const loginForm = document.getElementById("loginForm");
+const getProfile = document.getElementById("getProfile")
 
 if (listCart || listMessages || listProducts) {
   var socket = io();
+}
+
+if (loginForm) {
+  loginForm.addEventListener("submit", async (evt) => {
+    evt.preventDefault();
+    const formValues = {
+      email: loginForm.email.value,
+      password: loginForm.password.value,
+    };
+    if (
+      loginForm.email.value.trim().length &&
+      loginForm.password.value.trim().length > 0
+    ) {
+      console.log(formValues);
+      const response = await fetch("sessions/login", {
+        method: "post",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(formValues),
+      });
+      const data = await response.json()
+    }
+  });
+}
+
+if(getProfile){
+  getProfile.addEventListener("click", async(evt)=>{
+    const response = await fetch("sessions/profile-jws-passport", {
+      method: "get",
+    });
+    const data = await response.json()
+    console.log({response: data})
+  })
 }
 
 if (listMessages) {
@@ -85,11 +122,6 @@ if (listProducts) {
       const li = document.createElement("li");
       const cartButton = document.createElement("button");
       cartButton.innerText = "Agregar al carrito";
-      // if (el.id >= 0) {
-      //   li.innerText = `${el.title}: ${el.price}, ID: ${el.id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
-      //   listProducts.appendChild(li);
-      // } else if (el._id) {     }
-
       li.innerText = `${el.title}: ${el.price}, _id: ${el._id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
       li.appendChild(cartButton);
       listProducts.appendChild(li);
@@ -97,12 +129,6 @@ if (listProducts) {
     if (pageList) {
       pageList.innerHTML = "";
       if (data.hasPrevPage) {
-        // const aPrev = document.createElement("a");
-        // aPrev.href = `/products?page=${data.prevPage}`;
-        // aPrev.innerHTML = `Anterior`;
-        // pageList.appendChild(aPrev);
-
-        //button
         const buttonPrev = document.createElement("button");
         buttonPrev.innerText = "Anterior";
         buttonPrev.addEventListener("click", (evt) => {
@@ -112,11 +138,6 @@ if (listProducts) {
         pageList.appendChild(buttonPrev);
       }
       if (data.hasNextPage) {
-        // const ahasPrev = document.createElement("a");
-        // ahasPrev.href = `/products?page=${data.nextPage}`;
-        // ahasPrev.innerHTML = `Siguiente`;
-        // pageList.appendChild(ahasPrev);
-
         const buttonNext = document.createElement("button");
         buttonNext.innerText = "Siguiente";
         buttonNext.addEventListener("click", (evt) => {

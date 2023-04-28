@@ -2,7 +2,7 @@
     Pagina login
 </h1>
 
-    <div></div>
+    {{!-- <div>
 <form action="/sessions/login" method="POST">
     <input type="text" placeholder="email" name="email">
     <br/>
@@ -10,10 +10,26 @@
     <br/>
     <button type="submit">Logiarse</button>
 </form>
+</div> --}}
 
-<br/>
+    <div>
+<form id="loginForm">
+    <input type="text" placeholder="email" name="email">
+    <br/>
+    <input type="text" placeholder="password" name="password">
+    <br/>
+    <button type="submit">Logiarse</button>
+</form>
+</div>
+
+<div>
+    <button id="getProfile">Envio peticion por token</button>
+</div>
+
+{{!-- <br/>
 <h2>Registro con github</h2>
 <div>
     <a href="/sessions/github">github</a>
 </div>
-</div>
+</div> --}}
+<script src="/js/index.js"></script>

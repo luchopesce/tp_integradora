@@ -1,9 +1,7 @@
-import cookieParser from "cookie-parser";
 import { Router, json } from "express";
 
 const router = Router();
 router.use(json());
-router.use(cookieParser("cookie-key"));
 /////////////////////////////////////////////////////////
 
 const thirtyDays = 30 * 24 * 60 * 60 * 1000;
