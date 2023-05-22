@@ -2,10 +2,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv"
 
+
+dotenv.config()
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const SECRET_KEY = "tokenSecretKey";
+const SECRET_KEY = process.env.SECRET_KEY
 
 export default __dirname;
 
@@ -31,20 +34,20 @@ export function isValidPassword(user, logPassword) {
 
 export function generateToken(user) {
   const token = jwt.sign(user, SECRET_KEY, {
-    expiresIn: "60s",
+    expiresIn: "24h",
   });
   return token;
 }
 
-export function validateToken(req, res, next) {
-  const token = req.cookies["token-cookie"]
-  console.log(token)
-  jwt.verify(token, SECRET_KEY, (err, info) => {
-    if (err) return res.status(401).send({ message: "Error de datos" });
-    req.user = info;
-    next();
-  });
-}
+// export function validateToken(req, res, next) {
+//   const token = req.cookies["token-cookie"]
+//   console.log(token)
+//   jwt.verify(token, SECRET_KEY, (err, info) => {
+//     if (err) return res.status(401).send({ message: "Error de datos" });
+//     req.user = info;
+//     next();
+//   });
+// }
 
 export const cookieExtractor = (req, res, next)=>{
   let token = null

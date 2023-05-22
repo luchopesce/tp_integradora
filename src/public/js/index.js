@@ -1,4 +1,3 @@
-
 let userName;
 
 const btnCookies = document.getElementById("get-cookie-btn");
@@ -13,46 +12,57 @@ const listMessages = document.getElementById("list-messages");
 const listCart = document.getElementById("list-carts");
 const listProducts = document.getElementById("list-products");
 const pageList = document.getElementById("list-page");
-const loginForm = document.getElementById("loginForm");
-const getProfile = document.getElementById("getProfile")
+const logoutBtn = document.getElementById("logout");
+// const loginForm = document.getElementById("loginForm");
+// const getProfile = document.getElementById("getProfile")
 
 if (listCart || listMessages || listProducts) {
   var socket = io();
 }
 
-if (loginForm) {
-  loginForm.addEventListener("submit", async (evt) => {
-    evt.preventDefault();
-    const formValues = {
-      email: loginForm.email.value,
-      password: loginForm.password.value,
-    };
-    if (
-      loginForm.email.value.trim().length &&
-      loginForm.password.value.trim().length > 0
-    ) {
-      console.log(formValues);
-      const response = await fetch("sessions/login", {
-        method: "post",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(formValues),
-      });
-      const data = await response.json()
-    }
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    fetch("sessions/logout", {
+      method: "post"
+    })
+      .then((res) => res.json())
+      .then(() => window.location.href="/login")
   });
 }
 
-if(getProfile){
-  getProfile.addEventListener("click", async(evt)=>{
-    const response = await fetch("sessions/profile-jws-passport", {
-      method: "get",
-    });
-    const data = await response.json()
-    console.log({response: data})
-  })
-}
+// if (loginForm) {
+//   loginForm.addEventListener("submit", async (evt) => {
+//     evt.preventDefault();
+//     const formValues = {
+//       email: loginForm.email.value,
+//       password: loginForm.password.value,
+//     };
+//     if (
+//       loginForm.email.value.trim().length &&
+//       loginForm.password.value.trim().length > 0
+//     ) {
+//       console.log(formValues);
+//       const response = await fetch("sessions/login", {
+//         method: "post",
+//         headers: {
+//           "Content-type": "application/json",
+//         },
+//         body: JSON.stringify(formValues),
+//       });
+//       const data = await response.json()
+//     }
+//   });
+// }
+
+// if(getProfile){
+//   getProfile.addEventListener("click", async(evt)=>{
+//     const response = await fetch("sessions/profile-jws-passport", {
+//       method: "get",
+//     });
+//     const data = await response.json()
+//     console.log({response: data})
+//   })
+// }
 
 if (listMessages) {
   Swal.fire({
@@ -118,37 +128,39 @@ if (listCart) {
 if (listProducts) {
   socket.on("list-products", (data) => {
     listProducts.innerHTML = "";
-    for (const el of data.docs) {
-      const li = document.createElement("li");
-      const cartButton = document.createElement("button");
-      cartButton.innerText = "Agregar al carrito";
-      li.innerText = `${el.title}: ${el.price}, _id: ${el._id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
-      li.appendChild(cartButton);
-      listProducts.appendChild(li);
-    }
-    if (pageList) {
-      pageList.innerHTML = "";
-      if (data.hasPrevPage) {
-        const buttonPrev = document.createElement("button");
-        buttonPrev.innerText = "Anterior";
-        buttonPrev.addEventListener("click", (evt) => {
-          evt.preventDefault();
-          socket.emit("page", data.prevPage);
-        });
-        pageList.appendChild(buttonPrev);
+    if (data) {
+      for (const el of data.docs) {
+        const li = document.createElement("li");
+        const cartButton = document.createElement("button");
+        cartButton.innerText = "Agregar al carrito";
+        li.innerText = `${el.title}: ${el.price}, _id: ${el._id}, CODE: ${el.code}, STATUS:${el.status}, STOCK:${el.stock}`;
+        li.appendChild(cartButton);
+        listProducts.appendChild(li);
       }
-      if (data.hasNextPage) {
-        const buttonNext = document.createElement("button");
-        buttonNext.innerText = "Siguiente";
-        buttonNext.addEventListener("click", (evt) => {
-          evt.preventDefault();
-          socket.emit("page", data.nextPage);
-        });
-        pageList.appendChild(buttonNext);
+      if (pageList) {
+        pageList.innerHTML = "";
+        if (data.hasPrevPage) {
+          const buttonPrev = document.createElement("button");
+          buttonPrev.innerText = "Anterior";
+          buttonPrev.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            socket.emit("page", data.prevPage);
+          });
+          pageList.appendChild(buttonPrev);
+        }
+        if (data.hasNextPage) {
+          const buttonNext = document.createElement("button");
+          buttonNext.innerText = "Siguiente";
+          buttonNext.addEventListener("click", (evt) => {
+            evt.preventDefault();
+            socket.emit("page", data.nextPage);
+          });
+          pageList.appendChild(buttonNext);
+        }
+        const spanPage = document.createElement("span");
+        spanPage.innerHTML = `Pagina ${data.page} de ${data.totalPages}`;
+        pageList.appendChild(spanPage);
       }
-      const spanPage = document.createElement("span");
-      spanPage.innerHTML = `Pagina ${data.page} de ${data.totalPages}`;
-      pageList.appendChild(spanPage);
     }
   });
 }

@@ -18,21 +18,21 @@ const initialzedPassport = () => {
       },
       async (req, username, password, done) => {
         try {
-          const { name, surname } = req.body;
+          const { first_name, last_name } = req.body;
           const user = await userModel.findOne({ email: username });
           if (user) {
             return done(null, false);
           } else {
-            let rol = "usuario";
+            let role;
             if (username.endsWith("@coder.com")) {
-              rol = "admin";
+              role = "admin";
             }
             const newUser = {
-              name,
-              surname,
+              first_name: first_name,
+              last_name: last_name,
               email: username,
               password: createHashB(password),
-              rol: rol,
+              role: role,
             };
             const userCreated = await userModel.create(newUser);
             return done(null, userCreated);
@@ -52,7 +52,7 @@ const initialzedPassport = () => {
         clientSecret: "28335403f217daea60f909e9a8a9a194a7b17403",
         callbackURL: "http://localhost:8080/sessions/github-callback",
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (accessToken, profile, done) => {
         try {
           const user = await userModel.findOne({ email: profile.username });
           if (user) {
@@ -115,14 +115,6 @@ const initialzedPassport = () => {
     )
   );
 
-  passport.serializeUser((user, done) => {
-    return done(null, user._id);
-  });
-
-  passport.deserializeUser(async (id, done) => {
-    const user = await userModel.findById(id);
-    return done(null, user);
-  });
 };
 
 

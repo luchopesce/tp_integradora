@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
+import { cartCollection } from "./cart.model.js";
 
 const userSchema = new mongoose.Schema({
-  name: {
+  first_name: {
     type: String,
+    required: true,
   },
-  surname: {
+  last_name: {
     type: String,
+    required: true,
   },
   email: {
     type: String,
@@ -16,9 +19,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  rol: {
+  cart:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: cartCollection
+  },
+  role: {
     type: String,
     required: true,
+    enum: ["user", "admin"],
+    default: "user"
   },
 });
 

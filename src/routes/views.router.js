@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { ProductManager, config, CartManager } from "../dao/index.js";
+import { authenticate, authorize } from "../middlewares/authenticate.js";
 
 const router = Router();
 const productManager = new ProductManager();
@@ -17,7 +18,7 @@ router.get("/", async (req, res) => {
   res.render("home");
 });
 
-router.get("/products", async (req, res) => {
+router.get("/products", authenticate("jwt"), async (req, res) => {
   const { app } = req;
   const io = app.get("io");
   const user = req.user;
@@ -65,7 +66,7 @@ router.get("/cookies", async (req, res) => {
   res.render("cookies");
 });
 
-router.get("/login", async (req, res) => {
+router.get("/login", authenticate("jwt"), async (req, res) => {
   const user = req.user
   if(user){
     res.redirect("/perfil");
@@ -83,17 +84,25 @@ router.get("/forgot", async (req, res) => {
   }
 });
 
-router.get("/perfil", async (req, res) => {
+router.get("/perfil", authenticate("jwt"), async (req, res) => {
   const user = req.user
     if(user){
       res.render("perfil", user);
     }else{
       res.redirect("/login")
     }
-
 });
 
-router.get("/registro", async (req, res) => {
+router.get("/current", authenticate("jwt"), async (req, res) => {
+  const user = req.user
+    if(user){
+      return res.json({UsuarioActual: user});
+    }else{
+      res.redirect("/login")
+    }
+});
+
+router.get("/registro", authenticate("jwt"), async (req, res) => {
   const user = req.user
   if(user){
     res.redirect("/perfil");
